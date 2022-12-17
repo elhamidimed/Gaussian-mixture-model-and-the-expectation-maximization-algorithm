@@ -329,7 +329,7 @@ ax1.set_title('K-means initialization of parameters')
 For $f:  \mathbb{R}^{I \times J} \mapsto \mathbb{R}$, the gradient is defined by $\frac{d}{d \mathbf{X}} f(\mathbf{X}) = \nabla_{\mathbf{X}}f(\mathbf{X}) =  [\frac{\partial}{\partial X_{ij}} f(\mathbf{X}) ]_{ij} $.
 
 Below are some useful derivatives:
-$
+$$
 \begin{equation}
 \frac{\partial \mathbf{x}^T \mathbf{a}}{\partial \mathbf{x}} = \frac{\partial \mathbf{a}^T \mathbf{x}}{\partial \mathbf{x}} = \mathbf{a}
 \end{equation}
@@ -356,4 +356,4 @@ $
 \begin{equation}
 \frac{\partial}{\partial \mathbf{X}}\ln \det(\mathbf{X}) = \big((\mathbf{X}^T)^{-1}\big)^T
 \end{equation}
-$
+$$
