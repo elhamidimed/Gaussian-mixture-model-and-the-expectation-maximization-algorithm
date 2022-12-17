@@ -114,189 +114,6 @@ To obtain this expression you have to use the method of [Lagrange multipliers](h
 
 - then you simply inject this solution into the constraint to find out the solution for $\lambda$.
 
-# Practical work
-
-
-```python
-class GMM():
-    """
-    Gaussian mixture model
-   """
-    def __init__(self, n_comp, data_dim=2, seed=None):
-
-        super(GMM, self).__init__()
-
-        self.n_comp = n_comp
-        self.data_dim = 2
-        self.init_param(seed=seed)
-                
-    def init_param(self, pis=None, means=None, covars=None, seed=None):
-        """
-        Initialize the model parameters using the provided arguments 
-        or randomly.
-        
-        Inputs 
-            pis: list of prior probabilities, length equal to self.n_comp
-            means: list of GMM means, length equal to self.n_comp
-            covars: list of GMM means, length equal to self.n_comp
-        Outputs
-            None
-        """
-        
-        if seed is not None:
-            np.random.seed(seed)
-        
-        if pis is not None:
-            self.pis = pis
-        else:
-            self.pis = []
-            for k in np.arange(self.n_comp):
-                # prior set to 1/K
-                self.pis.append(1/self.n_comp)
-        
-        if means is not None:
-            self.means = means
-        else:
-            self.means = []
-            for k in np.arange(self.n_comp):
-                # mean vector drawn from a centered unit Gaussian
-                mean = np.random.randn(self.data_dim)
-                self.means.append(mean)
-                
-        if covars is not None:
-            self.covars = covars
-        else:
-            self.covars = []
-            for k in np.arange(self.n_comp):
-                # identity covariance
-                covar = np.eye(self.data_dim)
-                self.covars.append(covar)
-                
-        if seed is not None:
-            np.random.seed()
-                
-    def fit(self, data, n_iter=50):
-        """
-        Fit a GMM with the EM algorithm
-        
-        Inputs 
-            data (number of points, dimension) array
-            n_iter 
-               
-        Outputs
-            log-marginal likelihood
-        """
-        LML = []
-              
-        for iter in np.arange(n_iter):
-            
-            resp = self.E_step(data)
-            self.M_step(data, resp)
-            LML.append(self.compute_LML(data))
-            
-        return LML
-    
-    def E_step(self, data):
-        """
-        Compute the responsabilities
-        
-        Inputs 
-            data (number of points, dimension) array
-               
-        Outputs
-            responsabilities (number of points, number of GMM components)
-        """
-        
-        N = data.shape[0]
-        
-        resp = np.zeros((N,self.n_comp))
-        
-        ###### TO COMPLETE ######
-        # Use the static method GMM.compute_pdf_multi_gaussian() defined below
-        for k in range(len(self.pis)):
-            resp[:,k] += self.pis[k]*GMM.compute_pdf_multi_gaussian(data, self.means[k], self.covars[k])
-        resp = resp / np.sum(resp , axis = 1).reshape(N,1)
-        #########################
-        
-        return resp
-
-    def M_step(self, data, resp):
-        """
-        Update the model parameters
-        
-        Inputs 
-            data: (number of points, dimension) array
-               
-        Outputs
-            None
-        """
-        
-        ###### TO COMPLETE ######
-
-        Nk = np.sum(resp, axis=0)
-      
-        M = Nk.shape[0]
-        
-        #self.means = np.sum(np.dot(np.transpose(resp) , data), axis=1)/Nk.reshape(M,1)  
-        for k in range(len(self.pis)):
-            self.means[k] = np.sum(resp[:,k][:,np.newaxis]*data, axis = 0)/Nk[k]
-
-            self.covars[k] = np.transpose((resp[:,k][:,np.newaxis]*(data-self.means[k])))@(data-self.means[k])/Nk[k]
-            #self.covars[k]
-            
-        self.pis = Nk/N
-                    
-
-        #########################
-            
-    def compute_LML(self, data):
-        """
-        Compute the log-marginal likelihood
-        
-        Inputs 
-            data: (number of points, dimension) array
-               
-        Outputs
-            log-marginal likelihood
-        """
-        
-        LML = 0
-        
-        ###### TO COMPLETE ######              
-       
-        for k in range(len(self.pis)):
-
-
-            LML += self.pis[k]*GMM.compute_pdf_multi_gaussian(data, self.means[k], self.covars[k])
-            #LML += self.pis[k]*GMM.compute_pdf_multi_gaussian(data, self.means, self.covars)
-        
-        LML = np.log(LML)
-        
-        LML = np.mean(LML)
-        #########################
-        
-        return LML
-        
-    
-    @staticmethod
-    def compute_pdf_multi_gaussian(data, mean, covar):
-        """
-        Compute the pdf of a multivariate Gaussian distribution
-                
-        Inputs 
-            data: data points to evaluate the pdf (number of points, dimension) array
-            mean: mean vector (dimension,) array
-            covar: covariance matrix (dimension, dimension) array
-               
-        Outputs
-            pdf evaluated on 'data', (number of points,) array
-        """
-        rv = multivariate_normal(mean, covar)
-        return rv.pdf(data)
-
-
-```
-
 The ```GMM``` class defined in the previous cell implements a Gaussian mixture model. It has two important methods:
 - ```init_param()``` initializes the model parameters
 - ```fit()``` runs the EM algorithm to estimate the model parameters. It alternates between the E- and M-steps, and after each iteration it computes the log-marginal likelihood.
@@ -304,41 +121,7 @@ The ```GMM``` class defined in the previous cell implements a Gaussian mixture m
 In the following cell, we instantiate this class for our problem.
 
 
-```python
-gmm = GMM(n_comp=3, data_dim=2, seed=2)
-```
-
-
 The LML is defined as a sum over the data points. You will divide this sum by the number of data points, so that the value of the objective function does not depend on the size of the dataset. In other words, compute the mean instead of the sum.
-
-
-```python
-LML_init = gmm.compute_LML(x)
-
-print("log-marginal likelihood: %.4f" % LML_init)
-
-if int(LML_init*1000) == -22548:
-    print("so far, it seems to be ok")
-else:
-    print("argh, this is not the expected result, either you made a mistake, or my unit test is badly designed")
-```
-
-    log-marginal likelihood: -22.5486
-    so far, it seems to be ok
-    
-
-
-```python
-resp = gmm.E_step(x)
-
-if np.sum(resp) == N:
-    print("so far, it seems to be ok")
-else:
-    print("argh, this is not the expected result, either you made a mistake, or my unit test is badly designed")
-```
-
-    so far, it seems to be ok
-    
 
 To assign each point to each cluster, we simply look at the argmax of the reponsabilities. Run the following cell.
 
@@ -360,36 +143,10 @@ ax1.set_title('estimation')
 
 
 
-![png](output_16_1.png)
+![png](output_11_1.png)
 
 
 Updating the covariance matrix requires computing the outer product of vectors. Look at the notebook `numpy new axis trick` to help you.
-
-
-```python
-gmm.M_step(x, resp)
-```
-
-
-```python
-LML = gmm.compute_LML(x)
-delta_LML = LML - LML_init
-print(delta_LML*1000)
-print("log-marginal likelihood: %.4f" % LML)
-print("log-marginal likelihood improvement: %.4f" % delta_LML)
-
-if int(delta_LML*1000) == 19556:
-    print("\nthe log-marginal likelihood increased, well done!")
-else:
-    print("argh, this is not the expected result, either you made a mistake, or my unit test is badly designed")
-```
-
-    19556.30722357008
-    log-marginal likelihood: -2.9923
-    log-marginal likelihood improvement: 19.5563
-    
-    the log-marginal likelihood increased, well done!
-    
 
 #### If you got all my encouraging messages, then you are ready to fit the GMM on the data!
 
@@ -415,7 +172,7 @@ plt.xlabel("EM iterations")
 
 
 
-![png](output_23_1.png)
+![png](output_16_1.png)
 
 
 Let's have a look to the results.
@@ -439,7 +196,7 @@ ax2.set_title('ground truth')
 
 
 
-![png](output_25_1.png)
+![png](output_18_1.png)
 
 
 
@@ -461,7 +218,7 @@ ax1.set_title('estimation')
 
 
 
-![png](output_26_1.png)
+![png](output_19_1.png)
 
 
 We used synthetic data, so we actually also know the true model parameters.
@@ -520,7 +277,7 @@ ax1.set_title('K-means initialization of parameters')
 
 
 
-![png](output_30_1.png)
+![png](output_23_1.png)
 
 
 # Writing the K-means initialization function
