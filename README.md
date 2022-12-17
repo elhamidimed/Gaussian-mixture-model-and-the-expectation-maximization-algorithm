@@ -96,7 +96,7 @@ Make the depency on the model parameters $\theta = \{\pi_k, \boldsymbol{\mu}_k, 
 
 **Hints:**
 - The expectation of a sum is the sum of the expectations.
-- $$\mathbb{E}_{p(\mathbf{z} | \mathbf{x}; \tilde{\theta})}[f(\mathbf{z}_n)] = \mathbb{E}_{p(\mathbf{z}_n | \mathbf{x}_n; \tilde{\theta})}[f(\mathbf{z}_n)]$$ for any arbitrary function $f$;
+- $ \mathbb{E}_{p(\mathbf{z} | \mathbf{x}; \tilde{\theta})}[f(\mathbf{z}_n)] = \mathbb{E}_{p(\mathbf{z}_n | \mathbf{x}_n; \tilde{\theta})}[f(\mathbf{z}_n)]$ for any arbitrary function $f$;
 - $\mathbb{E}_{p(\mathbf{z}_n | \mathbf{x}_n; \tilde{\theta})}[\mathbb{1}\{z_n = k\}] = \sum\limits_{z_n = 1}^K \mathbb{1}\{z_n = k\} p(\mathbf{z}_n | \mathbf{x}_n; \tilde{\theta}) = p(\mathbf{z}_n = k | \mathbf{x}_n; \tilde{\theta}) = r_{n,k} $.
 
 
